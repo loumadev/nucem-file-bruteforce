@@ -10,31 +10,35 @@ async function checkFile(path) {
 			const text = data.text.toLowerCase();
 
 			const isTest = text.includes("kód testu");
-			const is2020 = isTest && text.includes("maturita 2020");
-			const is2022 = isTest && text.includes("maturita 2022");
+			const is1403 = isTest && text.includes("1403");
+			//const is2020 = isTest && text.includes("maturita 2020");
+			//const is2022 = isTest && text.includes("maturita 2022");
+			//const year = isTest && text.match(/2\d{3}/);
 
-			resolve({isTest, is2020, is2022});
+			resolve({isTest, is1403/* is2020, is2022, year */});
 		}).catch(err => {
-			console.log(`Error while parsing PDF:`, {err, path});
+			//console.log(`Error while parsing PDF:`, {err, path});
 			reject(err);
 		});
 	});
 }
 
 async function main() {
-	const files = fs.readdirSync(__dirname + "/files");
+	const files = fs.readdirSync(__dirname + "/named");
 	const results = [];
 
 	for(const file of files) {
-		const path = __dirname + "/files/" + file;
+		if(!file.endsWith(".pdf")) continue;
+
+		const path = __dirname + "/named/" + file;
 		const result = await checkFile(path).catch(err => null);
 		if(!result) {
 			continue;
 		}
 
 		console.log(`${file}:`, result);
-		if(result.is2020 || result.is2022) {
-			console.log(`[!!!] ${file} FOUND!`);
+		if(result.is1403) {
+			console.log(`[!!!] ${file} FOUND!`, 1403);
 			fs.cpSync(path, __dirname + "/results/" + file);
 		}
 
@@ -48,3 +52,7 @@ async function main() {
 }
 
 main();
+
+module.exports = {
+	checkFile
+};
